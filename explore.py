@@ -26,27 +26,16 @@ def _(engine, mo):
         f"""
         select * from `Activity`
         """,
+        output=False,
         engine=engine
     )
     return (df,)
 
 
 @app.cell
-def _(df):
-    df["type"].unique()
-    return
-
-
-@app.cell
 def _():
     entries = ["commented-on-facebook", "shared-a-post-on-facebook", "posted-to-story-on-facebook"]
     return (entries,)
-
-
-@app.cell
-def _(df, entries, pl):
-    df.filter((pl.col("type").is_in(entries)) & (pl.col("content") != ""))
-    return
 
 
 @app.cell
@@ -60,6 +49,7 @@ def _():
 @app.cell
 def _(df, entries, pl, translate_with_gemini):
     df.filter(
+        # filter entries with content
         (pl.col("type").is_in(entries)) & (pl.col("content") != "")
     )[:3].with_columns(pl.col("content").map_elements(translate_with_gemini))
     return
