@@ -211,15 +211,20 @@ with col2:
         all_locations.extend(row['locations'])
         all_species.extend(row['species'])
     
+    # Get top locations and species
     location_counts = pd.Series(all_locations).value_counts()
     species_counts = pd.Series(all_species).value_counts()
     
+    # Use head() to get top 5 items, then format for display
+    top_locations = location_counts.head(5)
+    top_species = species_counts.head(5)
+    
     location_placeholder.markdown("<div class='card'><b>Top Locations:</b><br>" + 
-                                 "<br>".join([f"{loc} ({count})" for loc, count in location_counts.items()[:5]]) +
+                                 "<br>".join([f"{loc} ({count})" for loc, count in zip(top_locations.index, top_locations.values)]) +
                                  "</div>", unsafe_allow_html=True)
     
     species_placeholder.markdown("<div class='card'><b>Top Species:</b><br>" + 
-                               "<br>".join([f"{sp} ({count})" for sp, count in species_counts.items()[:5]]) +
+                               "<br>".join([f"{sp} ({count})" for sp, count in zip(top_species.index, top_species.values)]) +
                                "</div>", unsafe_allow_html=True)
     
     mentioned_placeholder.markdown("<div class='card'><b>Most Mentioned People:</b><br>Click on a person to see details</div>", 
