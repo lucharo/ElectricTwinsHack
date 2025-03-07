@@ -134,3 +134,8 @@ def plot_subgraph_in_plotly(subgraph):
     
     return fig
 
+
+def load_networkx_graph(file_path):
+    # example file path = "graph_with_attributes.graphml"
+    graph_loaded = nx.read_graphml(file_path)
+    return graph_loaded
