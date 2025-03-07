@@ -2,3 +2,4 @@ networkx
 communities
 plotly
 nbformat
+fastparquet

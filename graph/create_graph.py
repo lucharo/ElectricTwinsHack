@@ -4,6 +4,7 @@ from itertools import combinations
 import matplotlib.pyplot as plt
 import networkx as nx
 from networkx.algorithms import node_classification
+import pickle
 
 
 def extract_data_with_query(query):
@@ -125,6 +126,13 @@ if __name__ == "__main__":
         else:
             subgraph.nodes[node]["llm_based_prediction"] = "no post data"
     nx.write_graphml(subgraph, "subgraph_with_predictions.graphml")
+    with open("subgraph_with_predictions.pickle", "wb") as f:
+        pickle.dump(subgraph, f)
+    # pickle this graph
+    # plt.figure(figsize=(12, 12))
+    # pos = nx.spring_layout(subgraph, k=0.1)  # Adjust k for better spacing
+    # nx.draw(graph, pos, node_size=0.5, width=0.1, edge_color="gray", with_labels=False)
+    # plt.savefig("graph.png")
 
     
 

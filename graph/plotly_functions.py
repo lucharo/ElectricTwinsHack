@@ -1,5 +1,7 @@
 import plotly.graph_objects as go
 import networkx as nx
+import sqlite3
+import pandas as pd
 
 
 def select_subgraph_with_single_node(graph, node):
@@ -139,3 +141,52 @@ def load_networkx_graph(file_path):
     # example file path = "graph_with_attributes.graphml"
     graph_loaded = nx.read_graphml(file_path)
     return graph_loaded
+
+
+def extract_data_with_query(query):
+    # Connect to SQLite database
+    conn = sqlite3.connect("../social_network_anonymized.db")
+
+    # Execute the query
+    data = pd.read_sql_query(query, conn)
+
+    # Close the connection
+    conn.close()
+
+    return data
+
+
+def plot_profile_traffic(profile_id):
+    extra_data = pd.read_parquet("translated_posts.parquet")
+    profile_actvitity_link = extract_data_with_query("SELECT * FROM ProfileActivity")
+    combined_data = pd.merge(extra_data, profile_actvitity_link[["profile_id", "activity_id"]], left_on='id', right_on='activity_id', how='left')
+    # Filter data for the specified profile
+    profile_data = combined_data[combined_data['profile_id'] == profile_id].copy()
+    
+    # Make sure the data is sorted by timestamp
+    profile_data.sort_values('timestamp', inplace=True)
+    latest_time = profile_data['timestamp'].max()
+    profile_data['days_from_latest'] = (profile_data['timestamp'] - latest_time) / 1000/ 3600/24
+    # Compute the cumulative sum of traffic_likelihood
+    profile_data['cumulative_traffic'] = profile_data['traffic_likelihood'].cumsum()
+    
+    # Create the Plotly figure
+    fig = go.Figure(
+        data=go.Scatter(
+            x=profile_data['days_from_latest'],
+            y=profile_data['cumulative_traffic'],
+            mode='lines+markers',  # Adds markers (dots) for each post
+            marker=dict(size=8),
+            # mode='lines',
+            name='Cumulative Traffic'
+        )
+    )
+    
+    # Update layout with titles and axis labels
+    fig.update_layout(
+        title=f'Cumulative Traffic Likelihood for Profile {profile_id}',
+        xaxis_title='Relative time of the post (days)',
+        yaxis_title='Cumulative Trafficking Likelihood'
+    )
+    
+    return fig
