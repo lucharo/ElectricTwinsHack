@@ -133,28 +133,23 @@ def _(genai):
 
 @app.cell
 def _(df, entries, os, pl, translate_with_gemini):
-    if os.path.isfile("translated_posts.parquet"):
-        translated = pl.read_parquet("translated_posts.parquet")
+    if os.path.isfile("data/translated_posts.parquet"):
+        unnested = pl.read_parquet("data/translated_posts.parquet")
     else:
         translated = df.filter(
             (pl.col("type").is_in(entries)) & (pl.col("content") != "")
         )[:500].with_columns(
             pl.col("content").map_elements(translate_with_gemini)
         )
-    return (translated,)
+        unnested = translated.select(pl.all().exclude("content"),  pl.col("content").str.json_decode()).unnest("content")
+        unnested.write_parquet("translated_posts.parquet")
+    return translated, unnested
 
 
 @app.cell
 def _(mo):
     mo.md(r"""## Visualising""")
     return
-
-
-@app.cell
-def _(pl, translated):
-    unnested = translated.select(pl.all().exclude("content"),  pl.col("content").str.json_decode()).unnest("content")
-    unnested.write_parquet("translated_posts.parquet")
-    return (unnested,)
 
 
 @app.cell
@@ -257,6 +252,12 @@ def _(pl, selected):
 def _():
     import altair as alt
     return (alt,)
+
+
+@app.cell
+def _(mo):
+    mo.md(r"""## Over time suspiciousness""")
+    return
 
 
 @app.cell
