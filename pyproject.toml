@@ -5,6 +5,8 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
+    "google-genai>=1.5.0",
     "marimo[sql]>=0.11.17",
     "polars>=1.24.0",
+    "streamlit>=1.43.0",
 ]
